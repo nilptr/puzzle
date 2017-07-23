@@ -2,9 +2,15 @@
 (function (window) {
   if ('URLSearchParams' in window) return;
 
-  function URLSearchParams(queryString) {
-    this.query = queryString
-      ? parseQuery(queryString)
+  function URLSearchParams(init) {
+    if (!(this instanceof URLSearchParams)) {
+      return new URLSearchParams(init);
+    }
+    if (init instanceof URLSearchParams) {
+      return new URLSearchParams(init.toString());
+    }
+    this.query = (typeof init === 'string' || init instanceof String)
+      ? parseQuery(init)
       : Object.create(null);
   }
 
@@ -49,7 +55,8 @@
 
   function parseQuery(queryString) {
     var query = Object.create(null);
-    queryString.split('&').map(function (s) {
+    var leading = queryString.lastIndexOf('?');
+    queryString.slice(leading + 1).split('&').map(function (s) {
       var tmp = s.split('=');
       return [
         decodeURIComponent(tmp[0]),
